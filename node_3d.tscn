@@ -1,23 +1,73 @@
-[gd_scene load_steps=6 format=3 uid="uid://c26xhctjudfx3"]
+[gd_scene load_steps=12 format=3 uid="uid://c26xhctjudfx3"]
 
 [ext_resource type="Shader" path="res://surface.gdshader" id="1_b7qq2"]
+[ext_resource type="FastNoiseLite" uid="uid://q42kjipxjl0c" path="res://new_fast_noise_lite.tres" id="2_wb7cr"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_a87ot"]
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_d171s"]
-noise = SubResource("FastNoiseLite_a87ot")
+[sub_resource type="NoiseTexture3D" id="NoiseTexture3D_gdqem"]
+width = 512
+height = 512
+depth = 512
+seamless = true
+noise = ExtResource("2_wb7cr")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_malad"]
 render_priority = 0
 shader = ExtResource("1_b7qq2")
-shader_parameter/noise = SubResource("NoiseTexture2D_d171s")
+shader_parameter/noise = SubResource("NoiseTexture3D_gdqem")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_1b011"]
-subdivide_width = 10
-subdivide_depth = 10
+size = Vector2(20, 20)
+subdivide_width = 100
+subdivide_depth = 100
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ahvmk"]
+frequency = 0.2705
+
+[sub_resource type="NoiseTexture3D" id="NoiseTexture3D_d37nu"]
+seamless = true
+noise = SubResource("FastNoiseLite_ahvmk")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ydxcd"]
+render_priority = 0
+shader = ExtResource("1_b7qq2")
+shader_parameter/noise = SubResource("NoiseTexture3D_d37nu")
+
+[sub_resource type="SphereMesh" id="SphereMesh_77i5m"]
+radius = 8.0
+height = 10.0
+radial_segments = 256
+rings = 256
+
+[sub_resource type="NoiseTexture3D" id="NoiseTexture3D_tqm8k"]
+width = 256
+height = 256
+depth = 256
+noise = ExtResource("2_wb7cr")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_d7uur"]
+render_priority = 0
+shader = ExtResource("1_b7qq2")
+shader_parameter/noise = SubResource("NoiseTexture3D_tqm8k")
 
 [node name="Node3D" type="Node3D"]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 material_override = SubResource("ShaderMaterial_malad")
 mesh = SubResource("PlaneMesh_1b011")
+surface_material_override/0 = SubResource("ShaderMaterial_ydxcd")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.65863, 0)
+material_override = SubResource("ShaderMaterial_malad")
+mesh = SubResource("SphereMesh_77i5m")
+skeleton = NodePath("../MeshInstance3D")
+surface_material_override/0 = SubResource("ShaderMaterial_d7uur")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.886648, 0.462445, 0, -0.462445, 0.886648, 0, 15.7946, 17.4899)
+fov = 73.125
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.9451, 16.4154, 12.6685)
+light_energy = 5.0
+omni_range = 30.9448
