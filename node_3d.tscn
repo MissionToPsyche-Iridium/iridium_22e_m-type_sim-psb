@@ -21,3 +21,5 @@ subdivide_depth = 10
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 material_override = SubResource("ShaderMaterial_malad")
 mesh = SubResource("PlaneMesh_1b011")
+
+[node name="Node3D" type="Node3D" parent="."]
