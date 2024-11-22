@@ -19,5 +19,11 @@ subdivide_depth = 10
 [node name="Node3D" type="Node3D"]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0980697, 0.0188631, -0.42111)
+material_override = SubResource("ShaderMaterial_malad")
+mesh = SubResource("PlaneMesh_1b011")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.20792, -0.0995136, 0.0799392)
 material_override = SubResource("ShaderMaterial_malad")
 mesh = SubResource("PlaneMesh_1b011")
