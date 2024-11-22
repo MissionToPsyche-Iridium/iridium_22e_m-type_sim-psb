@@ -23,5 +23,3 @@ material_override = SubResource("ShaderMaterial_malad")
 mesh = SubResource("PlaneMesh_1b011")
 
 [node name="Node3D" type="Node3D" parent="."]
-
-[node name="Node3D2" type="Node3D" parent="."]
