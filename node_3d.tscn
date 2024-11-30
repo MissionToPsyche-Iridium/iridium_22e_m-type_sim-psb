@@ -54,6 +54,7 @@ shader_parameter/noise = SubResource("NoiseTexture3D_tqm8k")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 material_override = SubResource("ShaderMaterial_malad")
 mesh = SubResource("PlaneMesh_1b011")
+<<<<<<< HEAD
 surface_material_override/0 = SubResource("ShaderMaterial_ydxcd")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
@@ -71,3 +72,9 @@ fov = 73.125
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.9451, 16.4154, 12.6685)
 light_energy = 5.0
 omni_range = 30.9448
+=======
+
+[node name="Node3D" type="Node3D" parent="."]
+
+[node name="Node3D2" type="Node3D" parent="."]
+>>>>>>> 163e3e794902c277e21b44d7cecf09d394ecba20
