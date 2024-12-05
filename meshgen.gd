@@ -37,7 +37,7 @@ func meshRegen() -> void:
 
 			var vert = Vector3(x, height * 20.0, z)  # Multiply height by 5.0 for more pronounced effect
 			verts.append(vert)
-			uvs.append(Vector2(u, v))
+			uvs.append(Vector2(u * 10, v * 10))
 			normals.append(Vector3(0, 1, 0))  # Simple normal pointing up
 
 	# Create triangles
@@ -70,12 +70,6 @@ func meshRegen() -> void:
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_array)
 	
 	genCollisions()
-	
-	var rigid_body = get_node("/root").find_child("TestBall", true, false)
-	rigid_body.position = Vector3(randf() * 20, 30, randf() * 20)
-	
-	var camera = get_node("/root").find_child("Camera3D", true, false)
-	camera.position = Vector3(rigid_body.position.x + 30, camera.position.y, rigid_body.position.z)
 
 func genCollisions() -> void:
 	var static_body = $StaticBody3D
