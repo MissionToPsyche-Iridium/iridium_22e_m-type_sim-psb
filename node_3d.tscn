@@ -1,7 +1,8 @@
-[gd_scene load_steps=12 format=3 uid="uid://c26xhctjudfx3"]
+[gd_scene load_steps=16 format=3 uid="uid://c26xhctjudfx3"]
 
 [ext_resource type="Shader" path="res://surface.gdshader" id="1_b7qq2"]
 [ext_resource type="FastNoiseLite" uid="uid://q42kjipxjl0c" path="res://new_fast_noise_lite.tres" id="2_wb7cr"]
+[ext_resource type="Script" path="res://meshgen.gd" id="3_xntrl"]
 
 [sub_resource type="NoiseTexture3D" id="NoiseTexture3D_gdqem"]
 width = 512
@@ -49,25 +50,66 @@ render_priority = 0
 shader = ExtResource("1_b7qq2")
 shader_parameter/noise = SubResource("NoiseTexture3D_tqm8k")
 
+[sub_resource type="ArrayMesh" id="ArrayMesh_2xvd6"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_4bden"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6hgrq"]
+albedo_color = Color(0.825594, 0, 0.237186, 1)
+
 [node name="Node3D" type="Node3D"]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+visible = false
 material_override = SubResource("ShaderMaterial_malad")
 mesh = SubResource("PlaneMesh_1b011")
 surface_material_override/0 = SubResource("ShaderMaterial_ydxcd")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.65863, 0)
+visible = false
 material_override = SubResource("ShaderMaterial_malad")
 mesh = SubResource("SphereMesh_77i5m")
 skeleton = NodePath("../MeshInstance3D")
 surface_material_override/0 = SubResource("ShaderMaterial_d7uur")
 
+[node name="MeshGen" type="MeshInstance3D" parent="."]
+mesh = SubResource("ArrayMesh_2xvd6")
+script = ExtResource("3_xntrl")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshGen"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshGen/StaticBody3D"]
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Button" type="Button" parent="Control"]
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Regenerate Mesh"
+
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.886648, 0.462445, 0, -0.462445, 0.886648, 0, 15.7946, 17.4899)
+transform = Transform3D(-4.37114e-08, -0.707107, 0.707107, 0, 0.707107, 0.707107, -1, 3.09086e-08, -3.09086e-08, 0, 30, 0)
 fov = 73.125
 
-[node name="OmniLight3D" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.9451, 16.4154, 12.6685)
-light_energy = 5.0
-omni_range = 30.9448
+[node name="TestBall" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8.19022, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TestBall"]
+shape = SubResource("SphereShape3D_4bden")
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="TestBall"]
+material = SubResource("StandardMaterial3D_6hgrq")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.813151, 0.582052, 0, -0.582052, 0.813151, 0, 0, 14.0346)
+shadow_enabled = true
+shadow_bias = 1.202
+shadow_normal_bias = 0.462
+shadow_opacity = 0.85
+
+[connection signal="button_down" from="Control/Button" to="MeshGen" method="meshRegen"]
