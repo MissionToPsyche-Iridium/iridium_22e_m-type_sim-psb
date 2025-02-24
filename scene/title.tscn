@@ -1,0 +1,167 @@
+[gd_scene load_steps=12 format=3 uid="uid://qknyyawy4hpm"]
+
+[ext_resource type="ArrayMesh" uid="uid://8kkfps6j4rwt" path="res://psyche_model.obj" id="1_i2d8k"]
+[ext_resource type="Script" path="res://script/ui/menus/title_buttons.gd" id="2_ma2tj"]
+[ext_resource type="PackedScene" uid="uid://bxa3pehu3cmaf" path="res://the machine.glb" id="3_lxqqj"]
+[ext_resource type="Script" path="res://script/menu_rotate_craft.gd" id="4_5c881"]
+[ext_resource type="Environment" uid="uid://v13wvi3yde1n" path="res://environment.tres" id="5_o862g"]
+
+[sub_resource type="SystemFont" id="SystemFont_0v1sy"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_icbt0"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_63xpa"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_rj311"]
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_tjc4k"]
+
+[sub_resource type="Compositor" id="Compositor_0ug1k"]
+
+[node name="Root" type="Node3D"]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="UI" type="MarginContainer" parent="CanvasLayer"]
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -198.0
+offset_right = 315.0
+offset_bottom = 198.0
+grow_vertical = 2
+size_flags_horizontal = 2
+size_flags_vertical = 3
+script = ExtResource("2_ma2tj")
+
+[node name="Settings" type="VBoxContainer" parent="CanvasLayer/UI"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 30
+
+[node name="Brightness" type="HBoxContainer" parent="CanvasLayer/UI/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/Settings/Brightness"]
+layout_mode = 2
+text = "Brightness"
+
+[node name="HSlider" type="HSlider" parent="CanvasLayer/UI/Settings/Brightness"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+
+[node name="Difficulty" type="HBoxContainer" parent="CanvasLayer/UI/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/Settings/Difficulty"]
+layout_mode = 2
+text = "Difficulty"
+
+[node name="Option" type="OptionButton" parent="CanvasLayer/UI/Settings/Difficulty"]
+layout_mode = 2
+selected = 1
+item_count = 3
+popup/item_0/text = "Easy"
+popup/item_1/text = "Medium"
+popup/item_1/id = 1
+popup/item_2/text = "Hard"
+popup/item_2/id = 2
+
+[node name="Back" type="Button" parent="CanvasLayer/UI/Settings"]
+layout_mode = 2
+text = "Back"
+
+[node name="Title" type="VBoxContainer" parent="CanvasLayer/UI"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 30
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/Title"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_constants/outline_size = 24
+theme_override_font_sizes/font_size = 64
+text = "Psyche"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Start" type="Button" parent="CanvasLayer/UI/Title"]
+custom_minimum_size = Vector2(120, 32)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_fonts/font = SubResource("SystemFont_0v1sy")
+text = "Start
+"
+
+[node name="Tutorial" type="Button" parent="CanvasLayer/UI/Title"]
+layout_mode = 2
+size_flags_vertical = 4
+text = "Tutorial
+"
+
+[node name="Settings" type="Button" parent="CanvasLayer/UI/Title"]
+layout_mode = 2
+size_flags_vertical = 4
+text = "Settings"
+
+[node name="Credits" type="Button" parent="CanvasLayer/UI/Title"]
+layout_mode = 2
+size_flags_vertical = 4
+text = "Credits
+"
+
+[node name="Exit" type="Button" parent="CanvasLayer/UI/Title"]
+layout_mode = 2
+size_flags_vertical = 4
+text = "Exit
+"
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.5, 1, 1)
+
+[node name="Psyche" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 450, -500, -343)
+script = ExtResource("4_5c881")
+max = 0.03
+
+[node name="ModelParent" type="Node3D" parent="Psyche"]
+transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
+
+[node name="PsycheModel" type="MeshInstance3D" parent="Psyche/ModelParent"]
+transform = Transform3D(1, 0, 2.98023e-08, 0, 1, 0, -2.98023e-08, 0, 1, -1.45091, -1.27135, -1.06373)
+mesh = ExtResource("1_i2d8k")
+skeleton = NodePath("../../../CanvasLayer/UI/Title")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Psyche"]
+shape = SubResource("SphereShape3D_icbt0")
+disabled = true
+
+[node name="Craft" type="RigidBody3D" parent="."]
+transform = Transform3D(0.573691, 0, 0.819072, 0, 1, 0, -0.819072, 0, 0.573691, -0.3, -0.3, -0.98)
+physics_material_override = SubResource("PhysicsMaterial_63xpa")
+script = ExtResource("4_5c881")
+
+[node name="Model" parent="Craft" instance=ExtResource("3_lxqqj")]
+transform = Transform3D(0.1, 0, -2.98023e-09, 0, 0.1, 0, 2.98023e-09, 0, 0.1, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Craft"]
+shape = SubResource("SphereShape3D_rj311")
+disabled = true
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.492834, -0.692206, 0.527224, 0, 0.605919, 0.795526, -0.870124, -0.392062, 0.298617, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource("5_o862g")
+camera_attributes = SubResource("CameraAttributesPractical_tjc4k")
+compositor = SubResource("Compositor_0ug1k")
+
+[connection signal="item_selected" from="CanvasLayer/UI/Settings/Difficulty/Option" to="CanvasLayer/UI" method="_on_difficulty_selected"]
+[connection signal="pressed" from="CanvasLayer/UI/Settings/Back" to="CanvasLayer/UI" method="_on_settings_back_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Title/Start" to="CanvasLayer/UI" method="_on_play_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Title/Settings" to="CanvasLayer/UI" method="_on_settings_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Title/Exit" to="CanvasLayer/UI" method="_on_exit_pressed"]

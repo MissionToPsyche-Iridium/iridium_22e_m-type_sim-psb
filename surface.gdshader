@@ -12,7 +12,7 @@ void fragment() {
 	vec4 world = INV_VIEW_MATRIX * vec4(VERTEX, 1.0);
 	vec4 sample = texture(noise, world.xyz / 10.0 + 0.5);
 	vec4 height = texture(noise, world.xyz / 10.0) * 2.0;
-	
+
 	ALBEDO = vec3(height.x, height.y, height.z);
 }
 
