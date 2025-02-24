@@ -1,4 +1,4 @@
-[gd_scene load_steps=96 format=4 uid="uid://c26xhctjudfx3"]
+[gd_scene load_steps=95 format=4 uid="uid://c26xhctjudfx3"]
 
 [ext_resource type="Script" path="res://script/terrain/mesh_gen_manager.gd" id="1_0whga"]
 [ext_resource type="Script" path="res://script/ui/gameplay/pause_menu.gd" id="1_gqder"]
@@ -10,9 +10,6 @@
 [ext_resource type="Script" path="res://script/main_camera.gd" id="8_qmbrc"]
 [ext_resource type="Script" path="res://script/craft.gd" id="9_dvk7t"]
 [ext_resource type="Environment" uid="uid://v13wvi3yde1n" path="res://environment.tres" id="10_mv1bb"]
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_o40o3"]
-domain_warp_type = 2
 
 [sub_resource type="LabelSettings" id="LabelSettings_p4vw4"]
 font_size = 22
@@ -1274,8 +1271,7 @@ script = ExtResource("1_gqder")
 
 [node name="MeshGenManager" type="Node3D" parent="."]
 script = ExtResource("1_0whga")
-noise = SubResource("FastNoiseLite_o40o3")
-noise_amplitude = 20.0
+noise_amplitude = 80.0
 noise_scale = 0.1
 
 [node name="DebugMenu" type="PanelContainer" parent="."]

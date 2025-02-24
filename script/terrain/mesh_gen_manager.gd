@@ -6,11 +6,10 @@ const VIEW_DISTANCE = 16  # How many meshes to load in each direction
 
 var mesh_scene = preload("res://scene/prefab/mesh_gen.tscn")
 
-@export var noise: FastNoiseLite
 @export var noise_amplitude: float
 @export var noise_scale: float
 # the real amount is 6250
-@export var psyche_radius = MESH_SIZE * 10
+@export var psyche_radius = MESH_SIZE * 100
 
 var current_meshes = {}
 var player: Node3D
@@ -28,11 +27,90 @@ var exit_mutex: Mutex
 var generation_thread: Thread
 var exit_thread: bool = false
 
+@onready var base_noise: FastNoiseLite = FastNoiseLite.new()
+@onready var detail_noise: FastNoiseLite = FastNoiseLite.new()
+@onready var warping_noise: FastNoiseLite = FastNoiseLite.new()
+@onready var crater_noise: FastNoiseLite = FastNoiseLite.new()
+@onready var crag_noise: FastNoiseLite = FastNoiseLite.new()
+
+func setup_noise() -> void:
+	# Base terrain noise
+	base_noise.seed = 6408
+	base_noise.frequency = 0.0005
+	base_noise.fractal_octaves = 5
+	base_noise.fractal_type = FastNoiseLite.FRACTAL_FBM
+	base_noise.noise_type = FastNoiseLite.TYPE_PERLIN
+	
+	# Detail noise for smaller features
+	detail_noise.seed = 6409
+	detail_noise.frequency = 0.002
+	detail_noise.fractal_octaves = 3
+	detail_noise.fractal_type = FastNoiseLite.FRACTAL_RIDGED
+	detail_noise.noise_type = FastNoiseLite.TYPE_PERLIN
+	
+	# Warping noise for terrain variation
+	warping_noise.seed = 6410
+	warping_noise.frequency = 0.0003
+	warping_noise.fractal_octaves = 2
+	warping_noise.noise_type = FastNoiseLite.TYPE_PERLIN
+	
+	# Crater noise for impact features
+	crater_noise.seed = 6411
+	crater_noise.frequency = 0.0001  # Large sparse craters
+	crater_noise.fractal_octaves = 1
+	crater_noise.noise_type = FastNoiseLite.TYPE_CELLULAR
+	crater_noise.cellular_distance_function = FastNoiseLite.DISTANCE_EUCLIDEAN
+	crater_noise.cellular_jitter = 1.0
+	
+	# Crag noise for sharp rocky features
+	crag_noise.seed = 6412
+	crag_noise.frequency = 0.0008
+	crag_noise.fractal_octaves = 2
+	crag_noise.fractal_type = FastNoiseLite.FRACTAL_RIDGED
+	crag_noise.noise_type = FastNoiseLite.TYPE_PERLIN
+
+func get_height(world_x: float, world_z: float) -> float:
+	# Apply domain warping for more natural-looking terrain
+	var warp_x = warping_noise.get_noise_2d(world_x * 0.5, world_z * 0.5) * 100.0
+	var warp_z = warping_noise.get_noise_2d(world_x * 0.5 + 1000.0, world_z * 0.5) * 100.0
+	
+	# Get base terrain
+	var base = base_noise.get_noise_2d(world_x + warp_x, world_z + warp_z) * noise_amplitude
+	var detail = detail_noise.get_noise_2d(world_x, world_z) * (noise_amplitude * 0.3)
+	
+	# Generate crater features
+	var crater = crater_noise.get_noise_2d(world_x, world_z)
+	crater = 1.0 - abs(crater)  # Invert and make positive
+	crater = pow(crater, 3.0)   # Sharpen crater edges
+	crater *= noise_amplitude * 0.8  # Scale crater depth
+	
+	# Generate sharp crag features
+	var crag = crag_noise.get_noise_2d(world_x, world_z)
+	crag = pow(max(crag, 0.0), 2.0)  # Sharpen positive values
+	crag *= noise_amplitude * 0.5
+	
+	# Combine all features
+	var combined = base
+	combined += detail * (abs(base) * 0.3 + 0.7)  # Detail varies with elevation
+	combined -= crater  # Subtract craters
+	combined += crag    # Add sharp features
+	
+	return combined
+
+# Helper function for smooth interpolation
+func smoothstep(edge0: float, edge1: float, x: float) -> float:
+	var t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0)
+	return t * t * (3.0 - 2.0 * t)
+
 func generate_mesh(chunk_position: Vector2i) -> Array:
 	var surface_array = []
 	surface_array.resize(Mesh.ARRAY_MAX)
 	
-	noise.seed = 6408
+	base_noise.seed = 6408
+	detail_noise.seed = 6409
+	warping_noise.seed = 6410
+	crater_noise.seed = 6411
+	crag_noise.seed = 6412
 	
 	var verts = PackedVector3Array()
 	var uvs = PackedVector2Array()
@@ -49,7 +127,7 @@ func generate_mesh(chunk_position: Vector2i) -> Array:
 			var world_x = x + (chunk_position.x * MESH_SIZE)
 			var world_z = z + (chunk_position.y * MESH_SIZE)
 			
-			var height = noise.get_noise_2d(world_x, world_z) * noise_amplitude
+			var height = get_height(world_x, world_z)
 
 			var flat_distance = sqrt(world_x * world_x + world_z * world_z) + 0.0001 # avoid division by zero
 			var theta = flat_distance / psyche_radius
@@ -94,6 +172,7 @@ func generate_mesh(chunk_position: Vector2i) -> Array:
 	return surface_array
 
 func _ready() -> void:
+	setup_noise()
 	player = get_parent().get_node("Craft")
 	if not player:
 		push_error("Player node not found!")
