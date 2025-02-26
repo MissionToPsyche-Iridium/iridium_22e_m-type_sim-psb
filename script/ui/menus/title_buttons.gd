@@ -2,6 +2,7 @@ extends Node
 
 func _ready() -> void:
 	$Settings/Difficulty/Option.selected = Globals.difficulty
+	$"Settings/Asteroid Scale/Option".selected = Globals.asteroid_scale
 
 func _on_exit_pressed() -> void:
 	get_tree().quit()
@@ -19,3 +20,6 @@ func _on_settings_back_pressed() -> void:
 
 func _on_difficulty_selected(index: int) -> void:
 	Globals.difficulty = index
+
+func _on_scale_selected(index: int) -> void:
+	Globals.asteroid_scale = index

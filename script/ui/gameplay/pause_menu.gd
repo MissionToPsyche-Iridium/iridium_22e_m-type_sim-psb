@@ -17,8 +17,14 @@ func _process(delta: float) -> void:
 		toggle_pause()
 
 func _on_exit_pressed() -> void:
-	toggle_pause()
+	if $PauseMenu.visible:
+		toggle_pause()
 	get_tree().change_scene_to_file("res://scene/title.tscn")
 
 func _on_resume_pressed() -> void:
 	toggle_pause()
+
+
+func _on_fixer_upper_pressed() -> void:
+	$Craft.fuel = 100
+	

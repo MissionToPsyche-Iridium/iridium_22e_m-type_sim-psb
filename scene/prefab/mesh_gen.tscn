@@ -21,8 +21,10 @@ heightmap_enabled = true
 heightmap_texture = ExtResource("3_j7aln")
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_57aog"]
-friction = 100.0
+friction = 15.0
 rough = true
+bounce = 0.75
+absorbent = true
 
 [node name="MeshGen" type="MeshInstance3D"]
 material_override = SubResource("StandardMaterial3D_bglje")

@@ -71,6 +71,23 @@ popup/item_1/id = 1
 popup/item_2/text = "Hard"
 popup/item_2/id = 2
 
+[node name="Asteroid Scale" type="HBoxContainer" parent="CanvasLayer/UI/Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/Settings/Asteroid Scale"]
+layout_mode = 2
+text = "Asteroid Scale"
+
+[node name="Option" type="OptionButton" parent="CanvasLayer/UI/Settings/Asteroid Scale"]
+layout_mode = 2
+selected = 1
+item_count = 3
+popup/item_0/text = "Tiny"
+popup/item_1/text = "Subtle"
+popup/item_1/id = 1
+popup/item_2/text = "Realistic"
+popup/item_2/id = 2
+
 [node name="Back" type="Button" parent="CanvasLayer/UI/Settings"]
 layout_mode = 2
 text = "Back"
@@ -205,6 +222,7 @@ camera_attributes = SubResource("CameraAttributesPractical_tjc4k")
 compositor = SubResource("Compositor_0ug1k")
 
 [connection signal="item_selected" from="CanvasLayer/UI/Settings/Difficulty/Option" to="CanvasLayer/UI" method="_on_difficulty_selected"]
+[connection signal="item_selected" from="CanvasLayer/UI/Settings/Asteroid Scale/Option" to="CanvasLayer/UI" method="_on_scale_selected"]
 [connection signal="pressed" from="CanvasLayer/UI/Settings/Back" to="CanvasLayer/UI" method="_on_settings_back_pressed"]
 [connection signal="pressed" from="CanvasLayer/UI/Title/Start" to="CanvasLayer/UI" method="_on_play_pressed"]
 [connection signal="pressed" from="CanvasLayer/UI/Title/Settings" to="CanvasLayer/UI" method="_on_settings_pressed"]

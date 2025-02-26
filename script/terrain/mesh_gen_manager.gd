@@ -2,7 +2,7 @@ extends Node3D
 
 const MESH_SIZE = 64  # Size of each mesh_gen
 const MESH_SEGMENTS = 64  # Number of segments in each direction
-const VIEW_DISTANCE = 16  # How many meshes to load in each direction
+const VIEW_DISTANCE = 32  # How many meshes to load in each direction
 
 var mesh_scene = preload("res://scene/prefab/mesh_gen.tscn")
 
@@ -34,6 +34,14 @@ var exit_thread: bool = false
 @onready var crag_noise: FastNoiseLite = FastNoiseLite.new()
 
 func setup_noise() -> void:
+	var size_setting = Globals.asteroid_scale
+	if size_setting == 0:
+		self.psyche_radius = MESH_SIZE * 20
+	elif size_setting == 1:
+		self.psyche_radius = MESH_SIZE * 100
+	else:
+		self.psyche_radius = MESH_SIZE * 62500
+	
 	# Base terrain noise
 	base_noise.seed = 6408
 	base_noise.frequency = 0.0005
@@ -177,7 +185,7 @@ func _ready() -> void:
 	if not player:
 		push_error("Player node not found!")
 	
-	player.position = Vector3(0, psyche_radius + 100, 0)
+	player.position = Vector3(0.1, psyche_radius + 100, 0.1)
 	
 	generation_mutex = Mutex.new()
 	finished_mutex = Mutex.new()
