@@ -1625,14 +1625,14 @@ mesh = SubResource("SphereMesh_hxrc3")
 transform = Transform3D(0.832012, 0, 0.554757, 0, 1, 0, -0.554757, 0, 0.832012, 0, 0, 0)
 
 [node name="RetrogradeSprite" type="Sprite3D" parent="Camera3D/Navball/Prograde"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.101)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.101)
 pixel_size = 0.0005
 texture = ExtResource("10_6puhy")
 region_enabled = true
-region_rect = Rect2(88, 0, 88, 100)
+region_rect = Rect2(100, 0, 100, 100)
 
 [node name="ProgradeSprite" type="Sprite3D" parent="Camera3D/Navball/Prograde"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.101)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.101)
 pixel_size = 0.0005
 texture = ExtResource("10_6puhy")
 region_enabled = true

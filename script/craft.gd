@@ -36,12 +36,8 @@ var explosion_frames = 0
 
 @onready var navball = $"../Camera3D/Navball"
 @onready var navball_prograde = $"../Camera3D/Navball/Prograde"
-# @onready var navball_retrograde = $"../Camera3D/Navball/Retrograde"
 # @onready var navball_radial_in = $"../Camera3D/Navball/RadialIn"
-# @onready var navball_radial_out = $"../Camera3D/Navball/RadialOut"
 # @onready var navball_normal = $"../Camera3D/Navball/Normal"
-# @onready var navball_antinormal = $"../Camera3D/Navball/Antinormal"
-
 
 func _physics_process(delta: float) -> void:
 	if get_tree().paused:
@@ -73,7 +69,9 @@ func _physics_process(delta: float) -> void:
 	var reference_basis = Basis(right_direction, up_direction, forward_direction)
 	
 	# Set navball to show craft orientation relative to this reference frame
-	navball.basis = reference_basis.inverse() * global_transform.basis
+	# Changed from -90 to 90 degrees to correct the upside-down orientation
+	var navball_correction = Basis(Vector3.RIGHT, deg_to_rad(90))
+	navball.basis = navball_correction * reference_basis.inverse() * global_transform.basis
 	
 	# Update navball prograde marker
 	if linear_velocity.length() > 0.01:
