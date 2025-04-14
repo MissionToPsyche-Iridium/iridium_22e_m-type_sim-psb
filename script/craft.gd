@@ -8,12 +8,13 @@ extends RigidBody3D
 @export_range(0.0, 100.0) var fuel = 100.0
 @export var fuelConsumption: float = 0.1 # fuel:dv ratio
 
-@export var stopping_angle: float = 5  # Degrees threshold
+@export var stopping_angle: float = 0.5  # Degrees threshold
 @export var stopping_velocity: float = 0.1  # Angular velocity threshold
 
 @export var do_silly_explosion: bool = true
 
 var crash_acceleration: float = 10
+var has_exploded: bool = false  # Add this flag to prevent multiple explosions
 
 signal fuelUpdate(fuel: float, dv: float)
 signal alignTargetChanged(new_val: String)
@@ -54,31 +55,13 @@ func _physics_process(delta: float) -> void:
 		$explosion.visible = false
 	
 	self.apply_force(-self.position.normalized() * 0.06)
-	
-	# Create a proper reference frame for the navball
-	# Origin is at planet center, Y is "up" (radial out from craft's position)
-	var up_direction = position.normalized()
-	# Choose any perpendicular vector for forward reference (north)
-	var forward_ref = Vector3.FORWARD
-	if abs(up_direction.dot(forward_ref)) > 0.9:
-		forward_ref = Vector3.RIGHT  # Use alternate reference if too close to up
-	var right_direction = up_direction.cross(forward_ref).normalized()
-	var forward_direction = right_direction.cross(up_direction).normalized()
-	
-	# Create reference frame basis
-	var reference_basis = Basis(right_direction, up_direction, forward_direction)
-	
-	# Set navball to show craft orientation relative to this reference frame
-	# Changed from -90 to 90 degrees to correct the upside-down orientation
-	var navball_correction = Basis(Vector3.RIGHT, deg_to_rad(90))
-	navball.basis = navball_correction * reference_basis.inverse() * global_transform.basis
-	
-	# Update navball prograde marker
+		
+	navball.basis = transform.basis
+
 	if linear_velocity.length() > 0.01:
-		# Convert velocity to reference frame coordinates
-		var velocity_in_reference = reference_basis.inverse() * linear_velocity.normalized()
-		# Set prograde marker rotation to point in velocity direction
-		navball_prograde.basis = Basis.looking_at(velocity_in_reference, Vector3.UP)
+		var local_vel_dir = linear_velocity.normalized()
+		
+		navball_prograde.basis = Basis.looking_at(local_vel_dir)
 		navball_prograde.visible = true
 	else:
 		navball_prograde.visible = false
@@ -86,12 +69,17 @@ func _physics_process(delta: float) -> void:
 	if (linear_velocity - prev_velocity).length() > crash_acceleration:
 		lock_controls = true
 		$"../FailDialog".visible = true
-		if do_silly_explosion:
+		
+		if do_silly_explosion and not has_exploded:
+			has_exploded = true
 			$explosion.visible = true
-		$model.visible = false
+			$model.visible = false
+			create_explosion_parts()
+		
 		crash.emit()
 	
 	if lock_controls:
+		navball.get_parent_node_3d().visible = false
 		return
 
 	var lateralAccel = Vector3.ZERO
@@ -133,6 +121,7 @@ func _physics_process(delta: float) -> void:
 		alignTarget = "none"
 		alignTargetChanged.emit(alignTarget)
 	
+	# Determine target alignment vector based on current mode
 	var alignVector = Vector3.ZERO
 	if alignTarget == "prograde":
 		alignVector = linear_velocity.normalized()
@@ -143,51 +132,73 @@ func _physics_process(delta: float) -> void:
 	elif alignTarget == "radial_out":
 		alignVector = position.normalized()
 	elif alignTarget == "normal":
-		alignVector = transform.basis.y.normalized()
-	elif alignTarget == "antinormal":
-		alignVector = -transform.basis.y.normalized()
-	elif alignTarget == "stabilize":
-		angularAccel = -angular_velocity.normalized() * angularThrust
-		if angularAccel.length() < stopping_velocity:
+		# Normal is perpendicular to velocity and position vectors
+		if linear_velocity.length() > 0.01:
+			alignVector = linear_velocity.cross(position).normalized()
+		else:
 			alignTarget = "none"
-			angularAccel = Vector3.ZERO
+			alignTargetChanged.emit(alignTarget)
+	elif alignTarget == "antinormal":
+		# Antinormal is opposite of normal
+		if linear_velocity.length() > 0.01:
+			alignVector = -linear_velocity.cross(position).normalized()
+		else:
+			alignTarget = "none"
+			alignTargetChanged.emit(alignTarget)
+	elif alignTarget == "stabilize":
+		# Just dampen rotation without changing orientation
+		angularAccel = -angular_velocity * angularThrust
+		if angular_velocity.length() < stopping_velocity:
+			angular_velocity = Vector3.ZERO
+			alignTarget = "none"
 			alignTargetChanged.emit(alignTarget)
 
-	const Kp = 0.8
-	const Ki = 0.5
-	const Kd = 0.5
-	const deadzone_deg = 0.1
+	# PID controller constants
+	const Kp = 2.0  # Proportional gain
+	const Kd = 1.0  # Derivative gain
+	const MAX_ANGLE_ERROR = PI  # Maximum angle for proportional scaling
 
-	if alignVector != Vector3.ZERO:
-		var target = alignVector.normalized()
-		var current = transform.basis.y.normalized()
-
-		var cos_angle = current.dot(target)
-		var angle = acos(clamp(cos_angle, -1.0, 1.0))
-		if angle < deg_to_rad(deadzone_deg):
-			integral = Vector3.ZERO
-			prev_error = Vector3.ZERO
+	# If we have a valid alignment target
+	if alignVector != Vector3.ZERO and alignTarget != "stabilize":
+		# Calculate desired direction and current direction
+		var target_dir = alignVector.normalized()
+		var current_dir = transform.basis.y.normalized()
+		
+		# Calculate the rotation axis and angle to align current with target
+		var cross_product = current_dir.cross(target_dir)
+		var dot_product = current_dir.dot(target_dir)
+		
+		# Clamp dot product to valid range (-1 to 1)
+		dot_product = clamp(dot_product, -1.0, 1.0)
+		
+		# Angle between the vectors
+		var angle = acos(dot_product)
+		
+		# If angle is small enough, we're aligned
+		if angle < deg_to_rad(stopping_angle):
+			angular_velocity = Vector3.ZERO
+			alignTarget = "none"
+			alignTargetChanged.emit(alignTarget)
 		else:
-			var error = current.cross(target)
-			error = error * (1.0 + angle / deg_to_rad(deadzone_deg))
-
-			var velocity_damping = -Kd * angular_velocity
-
-			integral += error * delta
-
-			var P = Kp * error
-			var I = Ki * integral
-			var accel = P + I + velocity_damping
+			# Calculate rotation axis (normalized cross product)
+			var rotation_axis = Vector3.ZERO
+			if cross_product.length_squared() > 0.000001:
+				rotation_axis = cross_product.normalized()
 			
-			if angle < deg_to_rad(stopping_angle):
-				angular_velocity = Vector3.ZERO
-				alignTarget = "none"
-				alignTargetChanged.emit(alignTarget)
-
-			angularAccel = accel.limit_length(angularThrust)
-	else:
-		integral = Vector3.ZERO
-		prev_error = Vector3.ZERO
+			# If we have a valid rotation axis
+			if rotation_axis != Vector3.ZERO:
+				# Calculate proportional term - scales with angle
+				var p_term = rotation_axis * angle
+				
+				# Calculate derivative term - dampen angular velocity
+				var d_term = -angular_velocity
+				
+				# Combine terms with weights
+				angularAccel = (Kp * p_term + Kd * d_term) * angularThrust
+				
+				# Limit the maximum torque
+				if angularAccel.length() > angularThrust:
+					angularAccel = angularAccel.normalized() * angularThrust
 
 	var consumption = fuelConsumption * (lateralAccel.length() + angularAccel.length()*0.2) * delta
 	if(fuel - consumption < 0):
@@ -236,3 +247,63 @@ func _on_sample_button_pressed() -> void:
 	
 	if result and (linear_velocity + angular_velocity).length() < 0.05: 
 		popUpTime = 5
+
+# Function to handle creating explosion parts
+func create_explosion_parts() -> void:
+	# Get the parent node that contains the craft
+	var parent_node = get_parent()
+	
+	# Create exploding parts from the model's children
+	var part_count = 0  # Limit number of parts for safety
+	for child in $model.get_children():
+		# Safety limit to prevent too many parts
+		if part_count > 20:
+			break
+			
+		# Skip non-visible or non-geometry nodes
+		if not (child is MeshInstance3D or child is Node3D) or not child.visible:
+			continue
+		
+		part_count += 1
+		
+		# Create a new RigidBody3D for this part
+		var part_body = RigidBody3D.new()
+		
+		# Add to the parent node (same level as the craft)
+		parent_node.add_child(part_body)
+		
+		# Set the position to match the child's global position by applying transforms
+		# First get the child's position relative to model
+		var child_transform = $model.transform * child.transform
+		
+		# Set the part_body's transform based on craft's transform
+		part_body.transform = transform * child_transform
+		
+		# Make a copy of the child node
+		var part = child.duplicate()
+		part.visible = true
+		part.scale *= 0.25
+		part.position = Vector3.ZERO
+		
+		# Add the part as a child of the RigidBody with identity transform
+		# We need to reset the transform since we already positioned the RigidBody correctly
+		# part.transform = Transform3D.IDENTITY
+		part_body.add_child(part)
+		
+		part_body.linear_velocity = linear_velocity
+		
+		# Set collision properties
+		var collision = CollisionShape3D.new()
+		
+		# Use box shape with appropriate size based on the part's scale
+		var shape = SphereShape3D.new()
+		
+		shape.radius = 0.05
+		collision.shape = shape
+		part_body.add_child(collision)
+		
+		# Set mass to be relatively light
+		part_body.mass = 10
+		
+		if part_count == 1:
+			$"../Camera3D".target_node = part_body

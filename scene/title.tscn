@@ -1,11 +1,11 @@
 [gd_scene load_steps=14 format=3 uid="uid://qknyyawy4hpm"]
 
 [ext_resource type="ArrayMesh" uid="uid://8kkfps6j4rwt" path="res://psyche_model.obj" id="1_i2d8k"]
-[ext_resource type="Script" path="res://script/ui/menus/title_buttons.gd" id="2_ma2tj"]
+[ext_resource type="Script" uid="uid://dfsegkutmgv7d" path="res://script/ui/menus/title_buttons.gd" id="2_ma2tj"]
 [ext_resource type="Texture2D" uid="uid://c2f7kpqsmgkiy" path="res://logo.png" id="2_nvht2"]
 [ext_resource type="PackedScene" uid="uid://bxa3pehu3cmaf" path="res://the machine.glb" id="3_lxqqj"]
 [ext_resource type="FontFile" uid="uid://combfv6yu26ds" path="res://font/JockeyOne-Regular.ttf" id="3_njcy7"]
-[ext_resource type="Script" path="res://script/menu_rotate_craft.gd" id="4_5c881"]
+[ext_resource type="Script" uid="uid://bapmk304hosnc" path="res://script/menu_rotate_craft.gd" id="4_5c881"]
 [ext_resource type="Environment" uid="uid://v13wvi3yde1n" path="res://environment.tres" id="5_o862g"]
 
 [sub_resource type="SystemFont" id="SystemFont_0v1sy"]
@@ -66,6 +66,7 @@ layout_mode = 2
 selected = 1
 item_count = 3
 popup/item_0/text = "Easy"
+popup/item_0/id = 0
 popup/item_1/text = "Medium"
 popup/item_1/id = 1
 popup/item_2/text = "Hard"
@@ -83,6 +84,7 @@ layout_mode = 2
 selected = 1
 item_count = 3
 popup/item_0/text = "Tiny"
+popup/item_0/id = 0
 popup/item_1/text = "Subtle"
 popup/item_1/id = 1
 popup/item_2/text = "Realistic"

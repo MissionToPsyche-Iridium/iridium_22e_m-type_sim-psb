@@ -1,24 +1,24 @@
-[gd_scene load_steps=9 format=3 uid="uid://dh5ueqvbdi43"]
+[gd_scene load_steps=10 format=3 uid="uid://dh5ueqvbdi43"]
 
+[ext_resource type="Shader" uid="uid://x1pth5oittif" path="res://shader/terrain_test.gdshader" id="1_lnkcm"]
 [ext_resource type="Texture2D" uid="uid://cmov2gy8huflq" path="res://gravel/Gravel009_2K-JPG_Color.jpg" id="1_vqy47"]
-[ext_resource type="Texture2D" uid="uid://bwb8ec3y48jjv" path="res://gravel/Gravel009_2K-JPG_AmbientOcclusion.jpg" id="2_d0vpt"]
-[ext_resource type="Texture2D" uid="uid://id1m6issoy2a" path="res://gravel/Gravel009_2K-JPG_Displacement.jpg" id="3_j7aln"]
-[ext_resource type="Texture2D" uid="uid://djmmkwtpev28o" path="res://gravel/Gravel009_2K-JPG_NormalGL.jpg" id="3_rblpk"]
-[ext_resource type="Texture2D" uid="uid://c0jo4jow8c8s2" path="res://gravel/Gravel009_2K-JPG_Roughness.jpg" id="4_omrfm"]
-[ext_resource type="Script" path="res://script/terrain/meshgen.gd" id="5_w5l3w"]
+[ext_resource type="Texture2D" uid="uid://ofiunjdu04nn" path="res://metal/Metal005_2K_Metalness.jpg" id="3_6mvw8"]
+[ext_resource type="Texture2D" uid="uid://c68s8j0541e7g" path="res://gravel/Gravel009_2K-JPG_NormalDX.jpg" id="3_nrcco"]
+[ext_resource type="Texture2D" uid="uid://vmvcdxo71xbi" path="res://metal/Metal005_2K_Roughness.jpg" id="5_vxxxw"]
+[ext_resource type="Script" uid="uid://b8hc767d35w3a" path="res://script/terrain/meshgen.gd" id="5_w5l3w"]
+[ext_resource type="Texture2D" uid="uid://5kyueixdfddv" path="res://metal/Metal005_2K_Color.jpg" id="6_p3tsf"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bglje"]
-diffuse_mode = 1
-albedo_texture = ExtResource("1_vqy47")
-metallic_specular = 0.0
-roughness_texture = ExtResource("4_omrfm")
-roughness_texture_channel = 4
-normal_enabled = true
-normal_texture = ExtResource("3_rblpk")
-ao_enabled = true
-ao_texture = ExtResource("2_d0vpt")
-heightmap_enabled = true
-heightmap_texture = ExtResource("3_j7aln")
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hnft8"]
+render_priority = 0
+shader = ExtResource("1_lnkcm")
+shader_parameter/camera_position = Vector3(0, 0, 0)
+shader_parameter/gravel_texture = ExtResource("1_vqy47")
+shader_parameter/normal_texture = ExtResource("3_nrcco")
+shader_parameter/metal_texture = ExtResource("6_p3tsf")
+shader_parameter/metal_normal_texture = ExtResource("3_nrcco")
+shader_parameter/metal_roughness_texture = ExtResource("5_vxxxw")
+shader_parameter/metal_metallic_texture = ExtResource("3_6mvw8")
+shader_parameter/texture_scale = 1.0
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_57aog"]
 friction = 15.0
@@ -27,7 +27,7 @@ bounce = 0.75
 absorbent = true
 
 [node name="MeshGen" type="MeshInstance3D"]
-material_override = SubResource("StandardMaterial3D_bglje")
+material_override = SubResource("ShaderMaterial_hnft8")
 skeleton = NodePath("../..")
 script = ExtResource("5_w5l3w")
 

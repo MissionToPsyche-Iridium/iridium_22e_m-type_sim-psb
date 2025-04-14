@@ -6,7 +6,7 @@ extends Camera3D
 
 var _velocity = Vector3.ZERO
 var _current_speed = move_speed
-var enableCamera = false
+@export var enableCamera = false
 
 signal enable
 
