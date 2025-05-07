@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://b1a2m3nif1v8u"]
+
+[ext_resource type="Script" uid="uid://cu0lm7sunw6rv" path="res://script/poi.gd" id="1_pjfqx"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_lm6jd"]
+radius = 5.0
+height = 10.0
+
+[node name="POI" type="Node3D"]
+script = ExtResource("1_pjfqx")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_lm6jd")

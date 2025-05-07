@@ -40,7 +40,8 @@ void fragment() {
 	float blend_factor = (cnoise2D(world_position.xz * 0.015) * 0.3 + 0.5);
 	vec2 final_uv = mix(distorted_uv, second_uv, blend_factor);
 
-	float metal_raw = cnoise2D(world_position.xz * 0.01);
+	//float metal_raw = cnoise2D(vec2(world_position.x * 0.8, world_position.z * 0.2)) - 0.5;
+	float metal_raw = 0.0;
 
 	float metal = smoothstep(-0.001, 0.001, metal_raw);
 	float metal_inv = 1.0 - metal;

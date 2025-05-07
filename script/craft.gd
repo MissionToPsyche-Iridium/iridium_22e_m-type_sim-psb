@@ -26,7 +26,7 @@ var integral: Vector3 = Vector3.ZERO
 var prev_error: Vector3 = Vector3.ZERO
 
 var prev_velocity: Vector3 = Vector3.ZERO
-var lock_controls: bool = false
+@export var lock_controls: bool = false
 
 func _ready() -> void:
 	fuelConsumption = 0.05 * (Globals.difficulty+1)
@@ -35,10 +35,74 @@ func _ready() -> void:
 var explosion_time = 0.0
 var explosion_frames = 0
 
+var animation_duration = 9.0
+@export var animation_time = 0.0
+@export var animation_direction = 0
+var animation_on_finish: Callable
+var animation_on_fail: Callable
+
 @onready var navball = $"../Camera3D/Navball"
 @onready var navball_prograde = $"../Camera3D/Navball/Prograde"
 # @onready var navball_radial_in = $"../Camera3D/Navball/RadialIn"
 # @onready var navball_normal = $"../Camera3D/Navball/Normal"
+
+@onready var RCSForward: Array[GPUParticles3D] = [$"RCS/Back/Top/Back", $"RCS/Back/Bottom/Back"]
+@onready var RCSBackward: Array[GPUParticles3D] = [$"RCS/Front/Top/Back", $"RCS/Front/Bottom/Back"]
+@onready var RCSLeft: Array[GPUParticles3D] = [$"RCS/Back/Top/Right", $"RCS/Back/Bottom/Right", $"RCS/Front/Top/Left", $"RCS/Front/Bottom/Left"]
+@onready var RCSRight: Array[GPUParticles3D] = [$"RCS/Back/Top/Left", $"RCS/Back/Bottom/Left", $"RCS/Front/Top/Right", $"RCS/Front/Bottom/Right"]
+@onready var RCSUp: Array[GPUParticles3D] = [$"RCS/Back/Bottom/Down", $"RCS/Front/Bottom/Down"]
+@onready var RCSDown: Array[GPUParticles3D] = [$"RCS/Back/Top/Up", $"RCS/Front/Top/Up"]
+
+@onready var RCSRollRight: Array[GPUParticles3D] = [$"RCS/Back/Top/Right", $"RCS/Front/Top/Right", $"RCS/Back/Bottom/Left", $"RCS/Front/Bottom/Left"]
+@onready var RCSRollLeft: Array[GPUParticles3D] = [$"RCS/Back/Top/Left", $"RCS/Front/Top/Left", $"RCS/Back/Bottom/Right", $"RCS/Front/Bottom/Right"]
+@onready var RCSYawRight: Array[GPUParticles3D] = [$"RCS/Back/Top/Right", $"RCS/Back/Bottom/Right", $"RCS/Front/Top/Right", $"RCS/Front/Bottom/Right"]
+@onready var RCSYawLeft: Array[GPUParticles3D] = [$"RCS/Back/Top/Left", $"RCS/Back/Bottom/Left", $"RCS/Front/Top/Left", $"RCS/Front/Bottom/Left"]
+@onready var RCSPitchDown: Array[GPUParticles3D] = [$"RCS/Back/Top/Up", $"RCS/Front/Bottom/Down"]
+@onready var RCSPitchUp: Array[GPUParticles3D] = [$"RCS/Back/Bottom/Down", $"RCS/Front/Top/Up"]
+
+func adjustRCSAnimation(lateralAccel: Vector3, angularAccel: Vector3) -> void:
+	lateralAccel = transform.basis.inverse() * lateralAccel
+	var forward = max(0, lateralAccel.z) / lateralThrust
+	var backward = max(0, -lateralAccel.z) / lateralThrust
+	var left = max(0, lateralAccel.x) / lateralThrust
+	var right = max(0, -lateralAccel.x) / lateralThrust
+	var up = max(0, lateralAccel.y) / lateralUpwardThrust
+	var down = max(0, -lateralAccel.y) / lateralUpwardThrust
+	
+	for i in range(RCSForward.size()):
+		RCSForward[i].amount_ratio = forward
+	for i in range(RCSBackward.size()):
+		RCSBackward[i].amount_ratio = backward
+	for i in range(RCSLeft.size()):
+		RCSLeft[i].amount_ratio = left
+	for i in range(RCSRight.size()):
+		RCSRight[i].amount_ratio = right
+	for i in range(RCSUp.size()):
+		RCSUp[i].amount_ratio = up
+	for i in range(RCSDown.size()):
+		RCSDown[i].amount_ratio = down
+	
+	angularAccel = transform.basis.inverse() * angularAccel
+	var pitchUp = max(0, angularAccel.x) / angularThrust
+	var pitchDown = max(0, -angularAccel.x) / angularThrust
+	var yawLeft = max(0, angularAccel.y) / angularThrust
+	var yawRight = max(0, -angularAccel.y) / angularThrust
+	var rollLeft = max(0, angularAccel.z) / angularThrust
+	var rollRight = max(0, -angularAccel.z) / angularThrust
+
+	for i in range(RCSRollLeft.size()):
+		RCSRollLeft[i].amount_ratio += rollLeft
+	for i in range(RCSRollRight.size()):
+		RCSRollRight[i].amount_ratio += rollRight
+	for i in range(RCSYawLeft.size()):
+		RCSYawLeft[i].amount_ratio += yawLeft
+	for i in range(RCSYawRight.size()):
+		RCSYawRight[i].amount_ratio += yawRight
+	for i in range(RCSPitchUp.size()):
+		RCSPitchUp[i].amount_ratio += pitchUp
+	for i in range(RCSPitchDown.size()):
+		RCSPitchDown[i].amount_ratio += pitchDown
+
 
 func _physics_process(delta: float) -> void:
 	if get_tree().paused:
@@ -59,9 +123,10 @@ func _physics_process(delta: float) -> void:
 	navball.basis = transform.basis
 
 	if linear_velocity.length() > 0.01:
-		var local_vel_dir = linear_velocity.normalized()
+		var global_vel_dir = linear_velocity.normalized()
+		var craft_local_vel_dir = transform.basis.inverse() * global_vel_dir
 		
-		navball_prograde.basis = Basis.looking_at(local_vel_dir)
+		navball_prograde.basis = Basis.looking_at(craft_local_vel_dir)
 		navball_prograde.visible = true
 	else:
 		navball_prograde.visible = false
@@ -213,15 +278,12 @@ func _physics_process(delta: float) -> void:
 	
 	self.apply_force(mass * lateralAccel)
 	self.apply_torque(mass * angularAccel)
-	
-	if popUpTime > 0:
-		popUpTime -= delta
-		$"../SamplePopup".visible = true
-	else:
-		$"../SamplePopup".visible = false
+
+	self.adjustRCSAnimation(lateralAccel, angularAccel)
 	
 	prev_velocity = linear_velocity
 
+	updateAnimation(delta)
 
 func setAlignTarget(new_val: String) -> void:
 	if new_val == "stabilize":
@@ -234,19 +296,6 @@ func setAlignTarget(new_val: String) -> void:
 		alignTargetChanged.emit(alignTarget)
 
 var popUpTime = 0.0
-
-func _on_sample_button_pressed() -> void:
-	var space_state = get_world_3d().direct_space_state
-	var query = PhysicsRayQueryParameters3D.create(
-		global_position,                    # from
-		global_position + Vector3.DOWN * 2,  # to (10 units down)
-		collision_mask,                     # collision mask (optional)
-		[self]                             # array of objects to exclude
-	)
-	var result = space_state.intersect_ray(query)
-	
-	if result and (linear_velocity + angular_velocity).length() < 0.05: 
-		popUpTime = 5
 
 # Function to handle creating explosion parts
 func create_explosion_parts() -> void:
@@ -282,7 +331,7 @@ func create_explosion_parts() -> void:
 		# Make a copy of the child node
 		var part = child.duplicate()
 		part.visible = true
-		part.scale *= 0.25
+		# part.scale *= 0.25
 		part.position = Vector3.ZERO
 		
 		# Add the part as a child of the RigidBody with identity transform
@@ -307,3 +356,35 @@ func create_explosion_parts() -> void:
 		
 		if part_count == 1:
 			$"../Camera3D".target_node = part_body
+
+func startAnimation(on_finish: Callable, on_fail: Callable) -> void:
+	animation_direction = 1
+	animation_time = 0
+	animation_duration = 10
+	animation_on_finish = on_finish
+	animation_on_fail = on_fail
+	
+func updateAnimation(delta: float) -> void:
+	if animation_time >= animation_duration:
+		animation_direction = -1
+		animation_on_finish.call()
+	elif animation_time < 0:
+		animation_direction = 0
+		animation_time = 0
+	
+	if animation_direction > 0 and linear_velocity.length() > 0.15:
+		animation_on_fail.call()
+		animation_direction = -10
+	
+	var drill_angle = -(3.14/2.0) * (1 - min(1, animation_time / 3.0))
+	if animation_time > 3.0:
+		var extension_time = animation_time - 3.0
+		var drill_extension = 0.85 * (1 - min(1, extension_time / 6.0))
+		$"model/Drill/Drill Bit".position.y = drill_extension
+		$"model/Drill/Drill Bit".rotation.y += 100 * delta
+	
+	$"model/Drill".rotation.x = drill_angle
+	
+	animation_time += animation_direction * delta
+	
+	

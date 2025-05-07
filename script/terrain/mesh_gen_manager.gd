@@ -11,6 +11,9 @@ var mesh_scene = preload("res://scene/prefab/mesh_gen.tscn")
 # the real amount is 6250
 @export var psyche_radius = MESH_SIZE * 100
 
+@export var poi_prefab: PackedScene
+@export var poi_materials: Dictionary[String, BaseMaterial3D]
+
 var current_meshes = {}
 var player: Node3D
 
@@ -40,7 +43,7 @@ func setup_noise() -> void:
 	elif size_setting == 1:
 		self.psyche_radius = MESH_SIZE * 100
 	else:
-		self.psyche_radius = MESH_SIZE * 62500
+		self.psyche_radius = MESH_SIZE * 200
 	
 	# Base terrain noise
 	base_noise.seed = 6408
@@ -270,9 +273,29 @@ func update_meshes() -> void:
 		for chunk_position in finished_meshes.keys():
 			if not current_meshes.has(chunk_position):
 				current_meshes[chunk_position] = mesh_scene.instantiate()
+				current_meshes[chunk_position].poi_prefab = poi_prefab
 				current_meshes[chunk_position].accept_mesh(finished_meshes[chunk_position])
 				current_meshes[chunk_position].position = Vector3(chunk_position.x * MESH_SIZE, 0, chunk_position.y * MESH_SIZE)
 				add_child(current_meshes[chunk_position])
+
+				if randf() < 0.1:
+					current_meshes[chunk_position].hasPOI = true
+					current_meshes[chunk_position].add_to_group("poi")
+					
+					var poi_name = poi_materials.keys()[randi_range(1, poi_materials.keys().size()-1)]
+					var poi_value = 100
+					if poi_name == "Iridium":
+						poi_value = 200
+					
+					current_meshes[chunk_position].poi_name = poi_name
+					current_meshes[chunk_position].poi_value = poi_value
+					
+					if poi_materials.has(poi_name):
+						current_meshes[chunk_position].poi_material = poi_materials[poi_name]
+					else:
+						current_meshes[chunk_position].poi_material = poi_materials["default"]
+
+				current_meshes[chunk_position].runScatter()
 
 				processed_this_frame += 1
 				if processed_this_frame >= max_instantiations_per_frame:

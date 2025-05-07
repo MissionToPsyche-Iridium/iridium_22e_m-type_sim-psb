@@ -58,7 +58,7 @@ float perlin(vec2 uv, vec2 size, int iterations, float persistence, float seed) 
 		size *= 2.0;
 		coef *= persistence;
 	}
-	
+
 	return rv / acc;
 }
 float wavelet(vec2 uv, vec2 size, float s, float frequency, float offset) {
@@ -89,7 +89,7 @@ float wavelet_noise(vec2 uv, vec2 size, int iterations, float persistence, float
 			local_uv *= -type;
 			size *= -type;
 		}
-		local_uv += seed2; 
+		local_uv += seed2;
 		seed2 = rand2(seed2);
 		q *= persistence;
 		seed += 0.1;
@@ -343,6 +343,3 @@ vec3 o5918_0_1_rgb = nm_o5918((uv), p_o5918_amount, 1024.000000000, _seed_variat
 	EMISSION = vec3(0.0)*p_o5895_emission_energy;
 
 }
-
-
-

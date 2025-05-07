@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://dcjc88jg62wdy"]
+
+[ext_resource type="PackedScene" uid="uid://cpju4cubjldkc" path="res://rock-scatter.glb" id="1_u75j8"]
+[ext_resource type="Material" uid="uid://blwymueiq0305" path="res://poi_material/default.tres" id="2_tnkr5"]
+
+[node name="rock-scatter" instance=ExtResource("1_u75j8")]
+
+[node name="Icosphere" parent="." index="0"]
+surface_material_override/0 = ExtResource("2_tnkr5")

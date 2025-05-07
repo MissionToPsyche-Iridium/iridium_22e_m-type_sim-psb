@@ -32,6 +32,11 @@ window/stretch/scale=1.5
 version_control/plugin_name="GitPlugin"
 version_control/autoload_on_startup=true
 
+[global_group]
+
+poi=""
+poi_marker=""
+
 [input]
 
 debug_move_forward={

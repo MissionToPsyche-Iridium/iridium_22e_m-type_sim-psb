@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://qknyyawy4hpm"]
+[gd_scene load_steps=19 format=3 uid="uid://qknyyawy4hpm"]
 
 [ext_resource type="ArrayMesh" uid="uid://8kkfps6j4rwt" path="res://psyche_model.obj" id="1_i2d8k"]
 [ext_resource type="Script" uid="uid://dfsegkutmgv7d" path="res://script/ui/menus/title_buttons.gd" id="2_ma2tj"]
@@ -6,9 +6,18 @@
 [ext_resource type="PackedScene" uid="uid://bxa3pehu3cmaf" path="res://the machine.glb" id="3_lxqqj"]
 [ext_resource type="FontFile" uid="uid://combfv6yu26ds" path="res://font/JockeyOne-Regular.ttf" id="3_njcy7"]
 [ext_resource type="Script" uid="uid://bapmk304hosnc" path="res://script/menu_rotate_craft.gd" id="4_5c881"]
+[ext_resource type="Script" uid="uid://c64kpy6lqfetr" path="res://scene/disclaimer.gd" id="4_glyem"]
 [ext_resource type="Environment" uid="uid://v13wvi3yde1n" path="res://environment.tres" id="5_o862g"]
+[ext_resource type="Texture2D" uid="uid://cmov2gy8huflq" path="res://gravel/Gravel009_2K-JPG_Color.jpg" id="6_6627o"]
+[ext_resource type="PackedScene" uid="uid://bg5aaifp0an3b" path="res://the machine v2/craft-v2.glb" id="6_ojksg"]
+[ext_resource type="Texture2D" uid="uid://c68s8j0541e7g" path="res://gravel/Gravel009_2K-JPG_NormalDX.jpg" id="7_5tkpx"]
 
 [sub_resource type="SystemFont" id="SystemFont_0v1sy"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5tkpx"]
+albedo_texture = ExtResource("6_6627o")
+normal_enabled = true
+normal_texture = ExtResource("7_5tkpx")
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_icbt0"]
 
@@ -23,6 +32,83 @@
 [node name="Root" type="Node3D"]
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Credits" type="PanelContainer" parent="CanvasLayer"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -441.0
+offset_right = 300.0
+offset_bottom = 441.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Credits"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="CanvasLayer/Credits/VBoxContainer"]
+layout_mode = 2
+text = "CREDITS"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="CanvasLayer/Credits/VBoxContainer"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+text = "Aria Harley
+Allison Flatt
+Jared Smithbauer
+Mathias Nebiyou
+
+Industry Mentor: Cassie Bowman
+Advisor: Shahid Hussain
+Co-Advisors: Meng Su, Jie Zhao
+
+PBR Materials by AmbientCG.com, used with permission (Rock005, SolarPanel003, Metal046A, Metal055A, and Foil002).
+
+Pysche Logo and Asteroid Artistic Renderings By NASA/ASU Psyche Team
+
+This work was created in partial fulfillment of Pennsylvania State University Capstone Course “CMPSC485W/SWENG481″. The work is a result of the Psyche Student Collaborations component of NASA’s Psyche Mission (https://psyche.asu.edu/). “Psyche: A Journey to a Metal World” [Contract number NNM16AA09C] is part of the NASA Discovery Program mission to solar system targets. Trade names and trademarks of ASU and NASA are used in this work for identification only. Their usage does not constitute an official endorsement, either expressed or implied, by Arizona State University or National Aeronautics and Space Administration. The content is solely the responsibility of the authors and does not necessarily represent the official views of ASU or NASA."
+autowrap_mode = 3
+
+[node name="PsycheDisclaimer" type="PanelContainer" parent="CanvasLayer"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -70.0
+offset_top = -25.0
+offset_right = 70.0
+offset_bottom = 25.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/PsycheDisclaimer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="CanvasLayer/PsycheDisclaimer/VBoxContainer"]
+layout_mode = 2
+text = "Controls Reference"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="CanvasLayer/PsycheDisclaimer/VBoxContainer"]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+text = "W, A, S, D, Q, E: Rotate Craft
+
+Arrow Keys, Left Shift, and Control: Accelerate Craft Laterally
+
+R: Hold to cancel rotational velocity."
+autowrap_mode = 3
 
 [node name="UI" type="MarginContainer" parent="CanvasLayer"]
 anchors_preset = 4
@@ -43,6 +129,7 @@ size_flags_vertical = 4
 theme_override_constants/separation = 30
 
 [node name="Brightness" type="HBoxContainer" parent="CanvasLayer/UI/Settings"]
+visible = false
 layout_mode = 2
 
 [node name="Label" type="Label" parent="CanvasLayer/UI/Settings/Brightness"]
@@ -139,7 +226,7 @@ theme_override_colors/font_color = Color(0.976471, 0.627451, 0, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
 theme_override_fonts/font = ExtResource("3_njcy7")
 theme_override_font_sizes/font_size = 18
-text = "MISSION TO A METAL WORLD"
+text = "SAMPLING A METAL WORLD"
 horizontal_alignment = 1
 
 [node name="Start" type="Button" parent="CanvasLayer/UI/Title"]
@@ -150,37 +237,27 @@ theme_override_fonts/font = SubResource("SystemFont_0v1sy")
 text = "Start
 "
 
-[node name="Tutorial" type="Button" parent="CanvasLayer/UI/Title"]
-layout_mode = 2
-size_flags_vertical = 4
-disabled = true
-text = "Tutorial
-"
-
 [node name="Settings" type="Button" parent="CanvasLayer/UI/Title"]
 layout_mode = 2
 size_flags_vertical = 4
 text = "Settings"
+
+[node name="Credits" type="Button" parent="CanvasLayer/UI/Title"]
+layout_mode = 2
+size_flags_vertical = 4
+text = "Credits"
+
+[node name="Disclaimer" type="Button" parent="CanvasLayer/UI/Title"]
+layout_mode = 2
+size_flags_vertical = 4
+text = "Controls Reference"
+script = ExtResource("4_glyem")
 
 [node name="Exit" type="Button" parent="CanvasLayer/UI/Title"]
 layout_mode = 2
 size_flags_vertical = 4
 text = "Exit
 "
-
-[node name="Credits" type="Label" parent="CanvasLayer"]
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -47.0
-grow_horizontal = 2
-grow_vertical = 0
-size_flags_horizontal = 4
-size_flags_vertical = 8
-text = "Created by Aria Harley, Allison Flatt, Jared Smithbauer, and Mathias Nebiyou"
-horizontal_alignment = 1
-vertical_alignment = 2
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.5, 1, 1)
@@ -197,6 +274,7 @@ transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
 transform = Transform3D(1, 0, 2.98023e-08, 0, 1, 0, -2.98023e-08, 0, 1, -1.45091, -1.27135, -1.06373)
 mesh = ExtResource("1_i2d8k")
 skeleton = NodePath("../../../CanvasLayer/UI/Title")
+surface_material_override/0 = SubResource("StandardMaterial3D_5tkpx")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Psyche"]
 shape = SubResource("SphereShape3D_icbt0")
@@ -207,8 +285,12 @@ transform = Transform3D(0.573691, 0, 0.819072, 0, 1, 0, -0.819072, 0, 0.573691, 
 physics_material_override = SubResource("PhysicsMaterial_63xpa")
 script = ExtResource("4_5c881")
 
+[node name="craft-v2" parent="Craft" instance=ExtResource("6_ojksg")]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+
 [node name="Model" parent="Craft" instance=ExtResource("3_lxqqj")]
 transform = Transform3D(0.1, 0, -2.98023e-09, 0, 0.1, 0, 2.98023e-09, 0, 0.1, 0, 0, 0)
+visible = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Craft"]
 shape = SubResource("SphereShape3D_rj311")
@@ -228,4 +310,6 @@ compositor = SubResource("Compositor_0ug1k")
 [connection signal="pressed" from="CanvasLayer/UI/Settings/Back" to="CanvasLayer/UI" method="_on_settings_back_pressed"]
 [connection signal="pressed" from="CanvasLayer/UI/Title/Start" to="CanvasLayer/UI" method="_on_play_pressed"]
 [connection signal="pressed" from="CanvasLayer/UI/Title/Settings" to="CanvasLayer/UI" method="_on_settings_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Title/Credits" to="CanvasLayer/UI/Title/Disclaimer" method="_on_credits_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/Title/Disclaimer" to="CanvasLayer/UI/Title/Disclaimer" method="_on_pressed"]
 [connection signal="pressed" from="CanvasLayer/UI/Title/Exit" to="CanvasLayer/UI" method="_on_exit_pressed"]
